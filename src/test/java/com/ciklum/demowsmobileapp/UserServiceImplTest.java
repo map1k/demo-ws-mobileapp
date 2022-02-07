@@ -10,6 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -24,6 +25,9 @@ public class UserServiceImplTest {
 
     @InjectMocks
     UserServiceImpl userService;
+
+    @Mock
+    BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @BeforeEach
     void setUp() {
@@ -56,6 +60,25 @@ public class UserServiceImplTest {
         assertThrows(UsernameNotFoundException.class,
                 ()-> userService.getUser("marat@email.com")
                 );
+    }
+
+    @Test
+    final void testCreateUser_UserExist()
+    {
+        UserEntity entity = new UserEntity();
+        entity.setId(1L);
+        entity.setFirstName("Marat");
+        entity.setLastName("Kra");
+        entity.setUserId("Adfsf213Adf");
+        entity.setEncryptedPass("23fAfega42@!f");
+        when(userRepository.findByEmail(anyString())).thenReturn(entity);
+
+        UserDto userDto = new UserDto();
+        userDto.setEmail("marat@email.com");
+
+        assertThrows(RuntimeException.class,
+                ()-> userService.createUser(userDto)
+        );
     }
 
 }

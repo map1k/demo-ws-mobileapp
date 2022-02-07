@@ -33,6 +33,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto createUser(UserDto userDto) {
         ModelMapper modelMapper = new ModelMapper();
+        if (userRepository.findByEmail(userDto.getEmail()) != null)
+            throw new RuntimeException(ErrorMessages.RECORD_ALREADY_EXISTS.getErrorMessage());
         userDto.getAddresses().forEach(address -> {
             address.setUser(userDto);
             address.setAddressId(UUID.randomUUID().toString());
