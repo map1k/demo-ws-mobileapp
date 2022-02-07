@@ -10,6 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.when;
@@ -32,13 +33,16 @@ public class UserServiceImplTest {
         UserEntity entity = new UserEntity();
         entity.setId(1L);
         entity.setFirstName("Marat");
-        entity.setFirstName("Kra");
+        entity.setLastName("Kra");
         entity.setUserId("Adfsf213Adf");
         entity.setEncryptedPass("23fAfega42@!f");
         when(userRepository.findByEmail(anyString())).thenReturn(entity);
 
         UserDto userDto = userService.getUser("email");
         assertNotNull(userDto);
-
+        assertEquals("Marat", userDto.getFirstName());
+        assertEquals("Kra", userDto.getLastName());
+        assertEquals("Adfsf213Adf", userDto.getUserId());
+        assertEquals("23fAfega42@!f", userDto.getEncryptedPass());
     }
 }
