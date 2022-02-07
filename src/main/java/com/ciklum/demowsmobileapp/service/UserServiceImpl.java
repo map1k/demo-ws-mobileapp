@@ -4,7 +4,6 @@ import com.ciklum.demowsmobileapp.dto.UserDto;
 import com.ciklum.demowsmobileapp.entity.UserEntity;
 import com.ciklum.demowsmobileapp.model.ErrorMessages;
 import com.ciklum.demowsmobileapp.repository.UserRepository;
-import org.hibernate.procedure.ParameterMisuseException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,8 +32,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto createUser(UserDto userDto) {
         ModelMapper modelMapper = new ModelMapper();
+
         if (userRepository.findByEmail(userDto.getEmail()) != null)
             throw new RuntimeException(ErrorMessages.RECORD_ALREADY_EXISTS.getErrorMessage());
+
         userDto.getAddresses().forEach(address -> {
             address.setUser(userDto);
             address.setAddressId(UUID.randomUUID().toString());
@@ -44,11 +45,6 @@ public class UserServiceImpl implements UserService {
         userEntity.setEncryptedPass(bCryptPasswordEncoder.encode(userDto.getPassword()));
         userEntity.setUserId(UUID.randomUUID().toString());
 
-        UserEntity old = userRepository.findByEmail(userEntity.getEmail());
-
-        if (old != null) {
-            throw new ParameterMisuseException(ErrorMessages.RECORD_ALREADY_EXISTS.getErrorMessage());
-        }
         UserEntity stored = userRepository.save(userEntity);
 
         return modelMapper.map(stored, UserDto.class);

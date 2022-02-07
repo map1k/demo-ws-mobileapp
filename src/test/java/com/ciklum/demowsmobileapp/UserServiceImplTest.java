@@ -12,14 +12,18 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import java.util.ArrayList;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
 
 public class UserServiceImplTest {
 
+    public static final String MARAT_EMAIL_COM = "marat@email.com";
     @Mock
     UserRepository userRepository;
 
@@ -63,14 +67,9 @@ public class UserServiceImplTest {
     }
 
     @Test
-    final void testCreateUser_UserExist()
+    final void testCreateUser_UserExistException()
     {
         UserEntity entity = new UserEntity();
-        entity.setId(1L);
-        entity.setFirstName("Marat");
-        entity.setLastName("Kra");
-        entity.setUserId("Adfsf213Adf");
-        entity.setEncryptedPass("23fAfega42@!f");
         when(userRepository.findByEmail(anyString())).thenReturn(entity);
 
         UserDto userDto = new UserDto();
@@ -79,6 +78,27 @@ public class UserServiceImplTest {
         assertThrows(RuntimeException.class,
                 ()-> userService.createUser(userDto)
         );
+    }
+
+    @Test
+    final void testCreateUser()
+    {
+        UserEntity entity = new UserEntity();
+        entity.setEmail(MARAT_EMAIL_COM);
+
+        when(userRepository.findByEmail(anyString())).thenReturn(null);
+        when(userRepository.save(any(UserEntity.class))).thenReturn(entity);
+        when(bCryptPasswordEncoder.encode(anyString())).thenReturn("passSdfa322!!");
+
+        UserDto userDto = new UserDto();
+        userDto.setEmail(MARAT_EMAIL_COM);
+        userDto.setPassword("asdas");
+        userDto.setAddresses(new ArrayList<>());
+
+        UserDto savedUserDto = userService.createUser(userDto);
+
+        assertNotNull(savedUserDto);
+        assertEquals(entity.getEmail(), savedUserDto.getEmail());
     }
 
 }
